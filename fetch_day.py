@@ -39,6 +39,6 @@ for symbol in symbols:
     print(formatHeader(symbol['n'],dateTimeStr))
     print(data[0:3])
     print(data[-3:])
-    path = os.getcwd() + '\\data\\{}_{}.csv'.format(symbol['s'],dateStr)
+    path = os.getcwd() + '\\{}_{}.csv'.format(symbol['s'],dateStr)
     data.to_csv(path,index=True)
 
