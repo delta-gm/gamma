@@ -16,6 +16,15 @@ PERIOD = '2y'
 INTERVAL = '1d'
 
 symbols = [
+    {'s':'AMD','n':'AMD'},
+    {'s':'APHA','n':'APHRIA'},
+    {'s':'ARRY','n':'ARRAY'},
+    {'s':'DELL','n':'DELL'},
+    {'s':'GOEV','n':'CANOO'},
+    {'s':'INTC','n':'INTEL'},
+    {'s':'MU','n':'MICRON'},
+    {'s':'PYR','n':'PYROGENESIS'},
+    {'s':'AMAT','n':'APPLIEDMATERIALS'},
     {'s':'NXPI','n':'NXP'},
     {'s':'TSLA','n':'TESLA'},
     {'s':'GME','n':'GAMESTOP'},
