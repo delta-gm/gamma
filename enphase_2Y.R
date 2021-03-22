@@ -10,41 +10,63 @@ library(plyr)
 
 
 
-NXP_raw<-read.csv("NXP_2years.csv")
-NXP<-na.omit(NXP_raw)
-head(NXP);dim(NXP)
-class(NXP$Date)
-NXP$Date<-as.Date(NXP$Date)
-class(NXP$Date)
-names(NXP)
-names(NXP)[names(NXP)=="Date"]<-"t"
-names(NXP)[names(NXP)=="Open"]<-"x"
+enphase_raw<-read.csv("ENPH_2years.csv")
+enphase<-na.omit(enphase_raw)
+head(enphase);dim(enphase)
+class(enphase$Date)
+enphase$Date<-as.Date(enphase$Date)
+class(enphase$Date)
+names(enphase)
+names(enphase)[names(enphase)=="Date"]<-"t"
+names(enphase)[names(enphase)=="Open"]<-"x"
 
 
-N1<-ggplot(NXP,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("NXP 2-Year Price History")
-N2<-ggAcf(NXP$x,type="correlation")+ggtitle("ACF of NXP, 2 years")
-N3<-ggAcf(NXP$x,type="partial")+ggtitle("PACF of NXP, 2 years")
+N1<-ggplot(enphase,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("enphase 2-Year Price History")
+N2<-ggAcf(enphase$x,type="correlation")+ggtitle("ACF of enphase, 2 years")
+N3<-ggAcf(enphase$x,type="partial")+ggtitle("PACF of enphase, 2 years")
 grid.arrange(N1,N2,N3)
-adf.test(NXP$x)
+adf.test(enphase$x)
+
+# STL Decomposition Models
+
+# Loess regression - local linear regression that applies more weight to data closer in time
+# to point of estimation. 
+
+# STL models use two loops: inner computes trend and seasonal components w/loess
+# Outer loop computes residuals
+# Loops run until convergence 
+
+# transform data to time series object in R
+enphase.ts<-ts(enphase$x,frequency=12)
+
+# fit stl model
+stl.model<-stl(enphase.ts,s.window="periodic")
+
+#plot fit
+autoplot(stl.model)
+
+# make forecast
+decomp.forecast<-forecast(stl.model,h=24,level=95)
+autoplot(decomp.forecast)
 
 #fit AR model: auto.arima() function
 
-ar.model<-auto.arima(NXP$x,max.d=0,max.q=0,allowdrift=T)
+ar.model<-auto.arima(enphase$x,max.d=0,max.q=0,allowdrift=T)
 ar.model
 
 # fit MA model
 
-ma.model<-auto.arima(NXP$x,max.d=0,max.p=0,allowdrift=T)
+ma.model<-auto.arima(enphase$x,max.d=0,max.p=0,allowdrift=T)
 ma.model
 
 # fit ARMA model
 
-arma.model<-auto.arima(NXP$x,max.d=0,allowdrift=T)
+arma.model<-auto.arima(enphase$x,max.d=0,allowdrift=T)
 arma.model
 
 # ARIMA
 
-arima.model<-auto.arima(NXP$x,allowdrift=T)
+arima.model<-auto.arima(enphase$x,allowdrift=T)
 arima.model
 
 # Ljung box test: null hypothesis of white noise - want to fail to reject this
@@ -98,16 +120,16 @@ grid.arrange(ar_cast,ma_cast,arma_cast,arima_cast)
 # Loops run until convergence 
 
 # transform data to time series object in R
-NXP.ts<-ts(NXP$x,frequency=12)
+enphase.ts<-ts(enphase$x,frequency=200)
 
 # fit stl model
-stl.model<-stl(NXP.ts,s.window="periodic")
+stl.model<-stl(enphase.ts,s.window="periodic")
 
 #plot fit
 autoplot(stl.model)
 
 # make forecast
-decomp.forecast<-forecast(stl.model,h=24,level=80)
+decomp.forecast<-forecast(stl.model,h=12,level=95)
 autoplot(decomp.forecast)
 
 

@@ -10,41 +10,63 @@ library(plyr)
 
 
 
-NXP_raw<-read.csv("NXP_2years.csv")
-NXP<-na.omit(NXP_raw)
-head(NXP);dim(NXP)
-class(NXP$Date)
-NXP$Date<-as.Date(NXP$Date)
-class(NXP$Date)
-names(NXP)
-names(NXP)[names(NXP)=="Date"]<-"t"
-names(NXP)[names(NXP)=="Open"]<-"x"
+gamestop_raw<-read.csv("GME_2years.csv")
+gamestop<-na.omit(gamestop_raw)
+head(gamestop);dim(gamestop)
+class(gamestop$Date)
+gamestop$Date<-as.Date(gamestop$Date)
+class(gamestop$Date)
+names(gamestop)
+names(gamestop)[names(gamestop)=="Date"]<-"t"
+names(gamestop)[names(gamestop)=="Open"]<-"x"
 
 
-N1<-ggplot(NXP,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("NXP 2-Year Price History")
-N2<-ggAcf(NXP$x,type="correlation")+ggtitle("ACF of NXP, 2 years")
-N3<-ggAcf(NXP$x,type="partial")+ggtitle("PACF of NXP, 2 years")
+N1<-ggplot(gamestop,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("gamestop 2-Year Price History")
+N2<-ggAcf(gamestop$x,type="correlation")+ggtitle("ACF of gamestop, 2 years")
+N3<-ggAcf(gamestop$x,type="partial")+ggtitle("PACF of gamestop, 2 years")
 grid.arrange(N1,N2,N3)
-adf.test(NXP$x)
+adf.test(gamestop$x)
+
+# STL Decomposition Models
+
+# Loess regression - local linear regression that applies more weight to data closer in time
+# to point of estimation. 
+
+# STL models use two loops: inner computes trend and seasonal components w/loess
+# Outer loop computes residuals
+# Loops run until convergence 
+
+# transform data to time series object in R
+gamestop.ts<-ts(gamestop$x,frequency=15)
+
+# fit stl model
+stl.model<-stl(gamestop.ts,s.window="periodic")
+
+#plot fit
+autoplot(stl.model)
+
+# make forecast
+decomp.forecast<-forecast(stl.model,h=1,level=95)
+autoplot(decomp.forecast)
 
 #fit AR model: auto.arima() function
 
-ar.model<-auto.arima(NXP$x,max.d=0,max.q=0,allowdrift=T)
+ar.model<-auto.arima(gamestop$x,max.d=0,max.q=0,allowdrift=T)
 ar.model
 
 # fit MA model
 
-ma.model<-auto.arima(NXP$x,max.d=0,max.p=0,allowdrift=T)
+ma.model<-auto.arima(gamestop$x,max.d=0,max.p=0,allowdrift=T)
 ma.model
 
 # fit ARMA model
 
-arma.model<-auto.arima(NXP$x,max.d=0,allowdrift=T)
+arma.model<-auto.arima(gamestop$x,max.d=0,allowdrift=T)
 arma.model
 
 # ARIMA
 
-arima.model<-auto.arima(NXP$x,allowdrift=T)
+arima.model<-auto.arima(gamestop$x,allowdrift=T)
 arima.model
 
 # Ljung box test: null hypothesis of white noise - want to fail to reject this
@@ -98,16 +120,16 @@ grid.arrange(ar_cast,ma_cast,arma_cast,arima_cast)
 # Loops run until convergence 
 
 # transform data to time series object in R
-NXP.ts<-ts(NXP$x,frequency=12)
+gamestop.ts<-ts(gamestop$x,frequency=200)
 
 # fit stl model
-stl.model<-stl(NXP.ts,s.window="periodic")
+stl.model<-stl(gamestop.ts,s.window="periodic")
 
 #plot fit
 autoplot(stl.model)
 
 # make forecast
-decomp.forecast<-forecast(stl.model,h=24,level=80)
+decomp.forecast<-forecast(stl.model,h=12,level=95)
 autoplot(decomp.forecast)
 
 

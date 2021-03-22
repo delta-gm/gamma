@@ -10,41 +10,43 @@ library(plyr)
 
 
 
-NXP_raw<-read.csv("NXP_2years.csv")
-NXP<-na.omit(NXP_raw)
-head(NXP);dim(NXP)
-class(NXP$Date)
-NXP$Date<-as.Date(NXP$Date)
-class(NXP$Date)
-names(NXP)
-names(NXP)[names(NXP)=="Date"]<-"t"
-names(NXP)[names(NXP)=="Open"]<-"x"
+nokia_raw<-read.csv("NOK_2years.csv")
+nokia<-na.omit(nokia_raw)
+head(nokia);dim(nokia)
+class(nokia$Date)
+nokia$Date<-as.Date(nokia$Date)
+class(nokia$Date)
+names(nokia)
+names(nokia)[names(nokia)=="Date"]<-"t"
+names(nokia)[names(nokia)=="Open"]<-"x"
 
 
-N1<-ggplot(NXP,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("NXP 2-Year Price History")
-N2<-ggAcf(NXP$x,type="correlation")+ggtitle("ACF of NXP, 2 years")
-N3<-ggAcf(NXP$x,type="partial")+ggtitle("PACF of NXP, 2 years")
+
+
+N1<-ggplot(nokia,aes(x=t,y=x))+geom_line()+xlab("Time")+ylab("Price")+ggtitle("nokia 2-Year Price History")
+N2<-ggAcf(nokia$x,type="correlation")+ggtitle("ACF of nokia, 2 years")
+N3<-ggAcf(nokia$x,type="partial")+ggtitle("PACF of nokia, 2 years")
 grid.arrange(N1,N2,N3)
-adf.test(NXP$x)
+adf.test(nokia$x)
 
 #fit AR model: auto.arima() function
 
-ar.model<-auto.arima(NXP$x,max.d=0,max.q=0,allowdrift=T)
+ar.model<-auto.arima(nokia$x,max.d=0,max.q=0,allowdrift=T)
 ar.model
 
 # fit MA model
 
-ma.model<-auto.arima(NXP$x,max.d=0,max.p=0,allowdrift=T)
+ma.model<-auto.arima(nokia$x,max.d=0,max.p=0,allowdrift=T)
 ma.model
 
 # fit ARMA model
 
-arma.model<-auto.arima(NXP$x,max.d=0,allowdrift=T)
+arma.model<-auto.arima(nokia$x,max.d=0,allowdrift=T)
 arma.model
 
 # ARIMA
 
-arima.model<-auto.arima(NXP$x,allowdrift=T)
+arima.model<-auto.arima(nokia$x,allowdrift=T)
 arima.model
 
 # Ljung box test: null hypothesis of white noise - want to fail to reject this
@@ -88,26 +90,18 @@ arima_cast<-autoplot(arima.forecast)
 grid.arrange(ar_cast,ma_cast,arma_cast,arima_cast)
 
 
-# STL Decomposition Models
-
-# Loess regression - local linear regression that applies more weight to data closer in time
-# to point of estimation. 
-
-# STL models use two loops: inner computes trend and seasonal components w/loess
-# Outer loop computes residuals
-# Loops run until convergence 
 
 # transform data to time series object in R
-NXP.ts<-ts(NXP$x,frequency=12)
+nokia.ts<-ts(nokia$x,frequency=157)
 
 # fit stl model
-stl.model<-stl(NXP.ts,s.window="periodic")
+stl.model<-stl(nokia.ts,s.window="periodic")
 
 #plot fit
 autoplot(stl.model)
 
 # make forecast
-decomp.forecast<-forecast(stl.model,h=24,level=80)
+decomp.forecast<-forecast(stl.model,h=24,level=65)
 autoplot(decomp.forecast)
 
 
